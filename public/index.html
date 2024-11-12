@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Long Polling Example</title>
+    <style>
+      .notifications {
+        margin-top: 20px;
+      }
+      .notification {
+        background-color: #f0f0f0;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Long Polling Notifications</h1>
+    <button onclick="startPolling()">Start Long Polling</button>
+    <button onclick="stopPolling()">Stop Polling</button>
+
+    <div id="notifications" class="notifications"></div>
+
+    <script>
+      let pollingController = null; // AbortController to cancel the fetch request
+      let pollingActive = false; // Flag to track if polling is active
+
+      function addNotification(message) {
+        const notificationDiv = document.getElementById("notifications");
+        const notificationElement = document.createElement("div");
+        notificationElement.classList.add("notification");
+        notificationElement.textContent = message;
+        notificationDiv?.appendChild(notificationElement);
+      }
+
+      // Start the long polling process
+      function startPolling() {
+        if (pollingActive) return; // Prevent multiple polling cycles at once
+        pollingActive = true; // Set pollingActive to true when polling starts
+
+        function poll() {
+          // If polling is stopped, do not continue polling
+          if (!pollingActive) return;
+
+          pollingController = new AbortController(); // Create a new AbortController for each new polling request
+
+          fetch("/poll", {
+            signal: pollingController.signal,
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then((data) => {
+              if (data.message) {
+                addNotification(data.message);
+              }
+              // Recursively continue polling after receiving data
+              poll();
+            })
+            .catch((err) => {
+              if (err.name === "AbortError") {
+                console.log("Polling was aborted");
+              } else {
+                console.error("Error during polling:", err);
+              }
+
+              // Retry the polling after some delay if the error is not due to abortion
+              if (pollingActive) {
+                setTimeout(poll, 5000);
+              }
+            });
+        }
+
+        poll(); // Start the initial polling request
+      }
+
+      // Stop polling by aborting the fetch request
+      function stopPolling() {
+        if (pollingActive) {
+          if (pollingController) {
+            pollingController.abort(); // Abort the ongoing fetch request
+            pollingController = null;
+          }
+          pollingActive = false; // Set to false to stop future cycles
+          console.log("Polling stopped.");
+        }
+      }
+    </script>
+  </body>
+</html>

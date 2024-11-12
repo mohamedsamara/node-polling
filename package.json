@@ -1,0 +1,33 @@
+{
+  "name": "node-polling",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "build": "tsc"
+  },
+  "keywords": [
+    "node",
+    "polling",
+    "server-sent-events"
+  ],
+  "author": "Mohamed Samara (https://github.com/mohamedsamara)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohamedsamara/node-polling.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mohamedsamara/node-polling/issues"
+  },
+  "homepage": "https://github.com/mohamedsamara/node-polling#readme",
+  "dependencies": {
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.9.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}
